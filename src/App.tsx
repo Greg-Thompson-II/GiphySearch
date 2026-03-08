@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-// import viteLogo from "/vite.svg";
 import "./App.css";
 import SearchBar from "./components/SearchBar/SearchBar";
 import { fetchTrendingGifs, fetchSearchedGifs } from "./store/apiFetchHelper";
@@ -25,6 +24,7 @@ function App() {
 
   const [gifs, setGifs] = useState<Gif[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selectedGif, setSelectedGif] = useState<Gif | null>(null);
 
@@ -36,6 +36,8 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
       try {
         if (searchURLValue) {
           await fetchSearchedGifs(searchURLValue, setGifs, setErrorMessage);
@@ -45,6 +47,7 @@ function App() {
       } catch (error) {
         console.error("Error fetching gifs:", error);
       } finally {
+        setIsLoading(false);
       }
     };
 
@@ -55,8 +58,22 @@ function App() {
     setSearchURLValue(debouncedSearchTerm || searchTerm);
   };
 
+  const handleLogoClick = () => {
+    setSelectedGif(null);
+    setSearchURLValue("");
+    setSearchTerm("");
+  };
+
   return (
     <div className={styles.App}>
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <span className={styles.logo} onClick={handleLogoClick}>
+            <span className={styles.logoAccent}>GIF</span>Search
+          </span>
+        </div>
+      </header>
+
       {selectedGif ? (
         <GifViewPage
           gif={selectedGif}
@@ -69,17 +86,43 @@ function App() {
             setSearchTerm={setSearchTerm}
             handleSubmitSearch={handleSubmitSearch}
           />
-          <section>
-            {searchURLValue ? <p>Search Results:</p> : <p>Trending Gifs:</p>}
-            <div className={styles.masonryContainer}>
-              {gifs.map((gif) => (
-                <GifVideoBlock
-                  key={gif.id}
-                  gif={gif}
-                  setSelectedGif={setSelectedGif}
-                />
-              ))}
-            </div>
+          <section className={styles.resultsSection}>
+            <h2 className={styles.sectionTitle}>
+              {searchURLValue ? (
+                <>
+                  Results for{" "}
+                  <span className={styles.searchQuery}>
+                    "{searchURLValue}"
+                  </span>
+                </>
+              ) : (
+                "Trending GIFs"
+              )}
+            </h2>
+
+            {isLoading ? (
+              <div className={styles.loadingState}>
+                <div className={styles.spinner} />
+                <p>Loading GIFs...</p>
+              </div>
+            ) : gifs.length === 0 && !errorMessage ? (
+              <div className={styles.emptyState}>
+                <p className={styles.emptyStateTitle}>No GIFs found</p>
+                <p className={styles.emptyStateSubtitle}>
+                  Try searching for something else
+                </p>
+              </div>
+            ) : (
+              <div className={styles.masonryContainer}>
+                {gifs.map((gif) => (
+                  <GifVideoBlock
+                    key={gif.id}
+                    gif={gif}
+                    setSelectedGif={setSelectedGif}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         </div>
       )}

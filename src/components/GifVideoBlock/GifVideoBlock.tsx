@@ -38,6 +38,10 @@ export default function GifVideoBlock({ gif, setSelectedGif }: Props) {
         <source src={gif.images.original.mp4} type="video/mp4"></source>
       </video>
 
+      <div className={styles.hoverOverlay} onClick={() => setSelectedGif(gif)}>
+        {gif.title && <p className={styles.gifTitle}>{gif.title}</p>}
+      </div>
+
       <button onClick={handleCopy} className={styles.copyButton}>
         {isCopied ? (
           <span>
