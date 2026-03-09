@@ -1,14 +1,9 @@
-export const API_KEY = import.meta.env.VITE_GIPHY_API_KEY;
-export const BASE_URL = "https://api.giphy.com/v1/gifs/";
-
 export const fetchTrendingGifs = async (
   setGifs: (gifs: any[]) => void,
   setErrorAlert: (message: string) => void,
 ) => {
   try {
-    const response = await fetch(
-      `${BASE_URL}trending?api_key=${API_KEY}&limit=10&bundle=low_bandwidth`,
-    );
+    const response = await fetch("/api/gifs/trending");
     const gifs = await parseAPIResponse(response, setErrorAlert);
     setGifs(gifs.data);
   } catch (error) {
@@ -23,9 +18,7 @@ export const fetchSearchedGifs = async (
 ) => {
   try {
     const response = await fetch(
-      `${BASE_URL}search?api_key=${API_KEY}&q=${encodeURIComponent(
-        newSearchTerm,
-      )}&limit=30&bundle=low_bandwidth`,
+      `/api/gifs/search?q=${encodeURIComponent(newSearchTerm)}`,
     );
     const gifs = await parseAPIResponse(response, setErrorMessage);
     setGifs(gifs.data);
